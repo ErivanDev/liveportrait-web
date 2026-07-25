@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivePortrait Web (WebGPU + ONNX)</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0e0e12;
+      color: #eee;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.3rem; margin-bottom: 0.25rem; }
+    .sub { color: #999; margin-bottom: 1.5rem; font-size: 0.9rem; }
+    .grid { display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; }
+    .panel {
+      background: #17171d;
+      border: 1px solid #2a2a33;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    canvas, video { max-width: 320px; border-radius: 8px; background: #000; }
+    #outputCanvas { max-width: 480px; width: 100%; }
+    label { display: block; margin: 0.5rem 0 0.25rem; font-size: 0.85rem; color: #bbb; }
+    .row { display: flex; gap: 1rem; align-items: center; margin: 0.4rem 0; }
+    button {
+      background: #4f46e5; color: #fff; border: none; border-radius: 6px;
+      padding: 0.5rem 1rem; cursor: pointer; font-size: 0.9rem;
+    }
+    button:disabled { background: #333; cursor: not-allowed; color: #777; }
+    #status { font-size: 0.85rem; color: #9fd; margin-top: 0.75rem; }
+    .hidden { display: none !important; }
+    #sourcePreview canvas { width: 128px; border-radius: 6px; }
+  </style>
+  <script type="module" crossorigin src="/assets/index-DSz5-c9R.js"></script>
+</head>
+<body>
+  <h1>LivePortrait Web — WebGPU + ONNX Runtime</h1>
+  <div class="sub">
+    Versão browser do <code>liveportrait-onnx-lite</code>: mesmo pipeline (SCRFD + landmarks + motion extractor + warping/SPADE), rodando 100% no navegador via <code>onnxruntime-web</code> (WebGPU, com fallback WASM). Nenhum frame sai da sua máquina.
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <label>1. Imagem-fonte (o rosto que vai ser animado)</label>
+      <input type="file" id="sourceInput" accept="image/*" />
+      <div id="sourcePreview" style="margin-top:0.5rem;"></div>
+
+      <label>2. Direção do movimento</label>
+      <div class="row">
+        <label style="display:inline;margin:0;"><input type="radio" name="driveMode" value="webcam" checked /> Webcam (ao vivo)</label>
+        <label style="display:inline;margin:0;"><input type="radio" name="driveMode" value="video" /> Vídeo</label>
+      </div>
+      <input type="file" id="drivingVideoInput" accept="video/*" />
+
+      <label>3. Opções (equivalentes às flags de run.py)</label>
+      <div class="row"><label style="display:inline;margin:0;"><input type="checkbox" id="flagRelative" checked /> Movimento relativo</label></div>
+      <div class="row"><label style="display:inline;margin:0;"><input type="checkbox" id="flagStitching" checked /> Stitching</label></div>
+      <div class="row"><label style="display:inline;margin:0;"><input type="checkbox" id="flagPasteback" checked /> Colar de volta na imagem original</label></div>
+
+      <div class="row" style="margin-top:1rem;">
+        <button id="startBtn" disabled>Iniciar</button>
+        <button id="resetMotionBtn">Reiniciar referência de movimento</button>
+        <button id="stopBtn" disabled>Parar</button>
+      </div>
+      <div id="status">Carregando...</div>
+      <div class="row">FPS: <span id="fps">-</span></div>
+    </div>
+
+    <div class="panel">
+      <label>Saída</label>
+      <canvas id="outputCanvas" width="512" height="512"></canvas>
+      <video id="webcamVideo" autoplay playsinline muted class="hidden"></video>
+      <video id="drivingVideo" playsinline muted class="hidden"></video>
+    </div>
+  </div>
+
+</body>
+</html>
